@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}TSURA.org - Event List{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="display-3">
+        TSURA
+    </h1>
+
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">Welcome!</h4>
+        <p>This is a new community project that shows hotlapping lap times from the Hotlapping TSU server. After every
+            event the times on this website should be updated within 10 seconds.</p>
+        <hr>
+        <p class="mb-0">Whenever you find or suspect a bug, please send a message to André Petersen on discord.</p>
+    </div>
+
+    <blockquote class="blockquote">
+        <p>TSURA stands for <a href="https://www.turbosliders.com/home" target="_blank">Turbo Sliders Unlimited</a>
+            Rascing Association.
+            <a href="https://discord.gg/eJcWWmRkXQ" target="_blank">Join us
+                on Discord!</a>
+        </p>
+    </blockquote>
+</div>
+<div class="container mt-5">
+    <h2 class="display-4">Event List</h2>
+    <div class="alert alert-danger" role="alert">
+        <i class="fa-solid fa-lightbulb"></i> The latest and currently active event is the first one in the list.
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th><i class="fa-solid fa-list-ol"></i> ID</th>
+                <th><i class="fa-solid fa-road"></i> Track</th>
+                <th><i class="fa-solid fa-car-side"></i> Car(s)</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                <td>{{ row[0] }}</td>
+                <td>
+                    {{ row[1] }}&nbsp;
+                    <a href='https://steamcommunity.com/workshop/browse/?appid=1478340&searchtext=%22{{ row[1]| replace(" ", "+") }}%22'
+                        target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
+                    </a>
+                </td>
+                <td>
+                    {% set cars = row[2] | split(',') %}
+                    {% for car in cars %}
+                    {{ car }}&nbsp;
+                    <a href='https://steamcommunity.com/workshop/browse/?appid=1478340&searchtext=%22{{ car| replace(" ", "+") }}%22'
+                        target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
+                    </a>
+                    <br />
+                    {% endfor %}
+                </td>
+                <td>
+                    <a href="/event/{{ row[0] }}" class="btn btn-danger btn-lg" tabindex="-1" role="button"
+                        aria-disabled="false"><i class="fa-solid fa-eye"></i> Results</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="container mt-5">
+    <h2 class="display-4">FAQ</h2>
+    <div class="accordion" id="accordionExample">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                    aria-expanded="true" aria-controls="collapseOne">
+                    How does this work?
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    Dedicated servers - like the hotlapping server - allow to log race results to a file. That file is
+                    automatically processed and times are written to a database right after each hotlapping session is
+                    over (roughly every 5 minutes).
+                    This website displays the data from the result database. If you want to participate, just join the
+                    hotlapping server and enjoy, no need to register. Track-Car-Combinations will probably change weekly
+                    so that everyone can get a chance to participate.
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Plans for future updates?
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    Absolutely! An overall standings list, elo calculation based on results, uploading lap time
+                    recordings along with records, checkpoint times, sophisticated ways to compare cp/sector/lap times,
+                    graphics etc. You have more ideas? Let me know!
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    Can I support?
+                </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    Of course! First of all taking part in the hotlapping competition is the most important way to
+                    support it. The more participants we have, the more fun it is! Also, as you can see, I am not a
+                    frontend web developer. If you are or you want to become one, let me know!
+                    You want to support financially? You can <a href="https://www.buymeacoffee.com/dremet"
+                        target="_blank">buy me a
+                        coffee</a> <i class="fa-solid fa-heart"></i>!
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

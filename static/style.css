@@ -1,0 +1,13 @@
+.accordion-button:not(.collapsed) {
+    background-color: var(--bs-danger-bg-subtle);
+    color: black
+}
+
+a {
+    color: #dc3545;
+}
+
+.best-sector-time {
+    color: var(--bs-danger) !important;
+    font-weight: bold;
+}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}TSURA.org - Event Details{% endblock %}
+
+{% block body %}
+<div class="container mt-3">
+    <a href="/" class="btn btn-danger btn-lg" tabindex="-1" role="button" aria-disabled="false"><i class="fa-solid fa-chevron-left"></i> Back to Event List</a>
+
+    <h2 class="display-4">Event Details</h2>
+    <!-- Event Details Table -->
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th><i class="fa-solid fa-list-ol"></i> ID</th>
+                <th><i class="fa-solid fa-road"></i> Track</th>
+                <th><i class="fa-solid fa-car-side"></i> Car(s)</th>
+                <th><i class="fa-solid fa-calendar-days"></i> First Result Entry (UTC Time)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ event["id"] }}</td>
+                <td>{{ event["track_name"] }}&nbsp;
+                    <a
+                        href='https://steamcommunity.com/workshop/browse/?appid=1478340&searchtext=%22{{ event["track_name"]| replace(" ", "+") }}%22' target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
+                    </a>
+                </td>
+                <td>
+                    {% set cars = event["car_names"] | split(',') %}
+                    {% for car in cars %}
+                    {{ car }}&nbsp;
+                    <a href='https://steamcommunity.com/workshop/browse/?appid=1478340&searchtext=%22{{ car| replace(" ", "+") }}%22'
+                        target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
+                    </a>
+                    <br />
+                    {% endfor %}
+                </td>
+                <td>{{ event["first_entry"].strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Best Laps per Driver Table -->
+    <h2 class="display-4">Standings</h2>
+    <p>This shows the best lap time per driver.</p>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th><i class="fa-solid fa-ranking-star"></i></th>
+                <th><i class="fa-solid fa-id-card"></i> Driver</th>
+                <th><i class="fa-solid fa-car-side"></i> Car</th>
+                <th><i class="fa-solid fa-stopwatch"></i> Best Lap</th>
+                {% for n in range(number_sectors) %}
+                <th><i class="fa-regular fa-hourglass-half"></i> Sector {{ n+1 }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for driver, lap in best_laps_per_driver.items() %}
+            <tr>
+                <td>{{ loop.index }}.</td>
+                <td>{{ driver }}&nbsp;
+                    <a href='https://steamcommunity.com/profiles/{{ lap["steam_id"] }}' target="_blank"><i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i></a>
+                </td>
+                <td>{{ lap["car"] }}&nbsp;
+                    <a href='https://steamcommunity.com/workshop/browse/?appid=1478340&searchtext=%22{{ lap["car"]| replace(" ", "+") }}%22'
+                        target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
+                    </a>
+                </td>
+                <td>{{ lap["best_lap_seconds"]| format_lap_time }}</td>
+                {% for sector_index in range(number_sectors) %}
+                {% set sector_time = lap["sector_times"][sector_index] if lap["sector_times"]|length > sector_index else "N/A" %}
+                {% set is_best_time = sector_time != "N/A" and sector_time|float == best_sector_times[sector_index]|float %}
+                <td class="{{ 'best-sector-time' if is_best_time }}">
+                    {{ sector_time|format_sector_time }}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+    <div class="alert alert-danger" role="alert">
+        Best theoretical lap time (based on best sector times): <strong>{{ best_theoretical_lap|format_lap_time }}</strong>
+    </div>
+
+
+    <!-- Best Laps Overall -->
+    <h2 class="display-4">All Lap Times</h2>
+    <p>This list includes all of the best lap times. It is not limited to one entry per driver and is a reliable source to check the best sector times.</p>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th><i class="fa-solid fa-ranking-star"></i></th>
+                <th><i class="fa-solid fa-id-card"></i> Driver</th>
+                <th><i class="fa-solid fa-car-side"></i> Car</th>
+                <th><i class="fa-solid fa-stopwatch"></i> Lap</th>
+                {% for n in range(number_sectors) %}
+                <th><i class="fa-regular fa-hourglass-half"></i> Sector {{ n+1 }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for lap in best_laps_overall %}
+        <tr>
+            <td>{{ loop.index }}.</td>
+            <td>{{ lap.driver }}&nbsp;
+                <a href='https://steamcommunity.com/profiles/{{ lap.steam_id }}' target="_blank"><i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i></a>
+            </td>
+            <td>{{ lap.car }}&nbsp;
+                    <a href='https://steamcommunity.com/workshop/browse/?appid=1478340&searchtext=%22{{ lap.car| replace(" ", "+") }}%22'
+                        target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
+                    </a>
+            </td>
+            <td>{{ lap.lap_time_seconds | format_lap_time }}</td>
+            {% for sector_index in range(number_sectors) %}
+                <td class="{% if lap.sector_times[sector_index]|float == best_sector_times[sector_index] %}best-sector-time{% endif %}">
+                {{ lap.sector_times[sector_index]|format_sector_time }}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <p>This list is limited to 500 entries.</p>
+</div>
+{% endblock %}
