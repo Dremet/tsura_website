@@ -91,19 +91,33 @@ def event(event_id):
     results_sql_query = text(
         """
         SELECT 
-            lr.id AS lap_result_id,
-            MIN(lr.lap_time) AS best_lap_seconds,
-            d.clan || ' | ' || d.name AS driver,
-            d.steam_id as steam_id,
-            c.name AS car
-        FROM tsu.lap_results lr
-        LEFT JOIN tsu.event_results er ON lr.event_result_id = er.id
-        LEFT JOIN tsu.events e ON er.event_id = e.id
-        LEFT JOIN tsu.drivers d ON er.driver_id = d.id
-        LEFT JOIN tsu.cars c ON er.car_id = c.id
-        WHERE e.id = :event_id
-        GROUP BY lr.id, d.name, d.steam_id , d.clan, c.name
-        ORDER BY MIN(lr.lap_time) ASC
+            lap_result_id,
+            best_lap_seconds,
+            driver,
+            steam_id,
+            car,
+            time_of_best_lap
+        FROM (
+            SELECT 
+                lr.id AS lap_result_id,
+                lr.lap_time AS best_lap_seconds,
+                CASE 
+                    WHEN d.clan != '' THEN d.clan || ' | ' || d.name 
+                    ELSE d.name 
+                END AS driver,
+                d.steam_id AS steam_id,
+                c.name AS car,
+                lr.created_at AS time_of_best_lap,
+                ROW_NUMBER() OVER (PARTITION BY d.steam_id ORDER BY lr.lap_time ASC) AS rn
+            FROM tsu.lap_results lr
+            JOIN tsu.event_results er ON lr.event_result_id = er.id
+            JOIN tsu.events e ON er.event_id = e.id
+            JOIN tsu.drivers d ON er.driver_id = d.id
+            JOIN tsu.cars c ON er.car_id = c.id
+            WHERE e.id = :event_id
+        ) subquery
+        WHERE rn = 1
+        order by best_lap_seconds asc, time_of_best_lap asc
         """
     )
     results = (
@@ -160,10 +174,11 @@ def event(event_id):
         """
         SELECT 
             lr.lap_time AS lap_time_seconds,
-            d.clan || ' | ' || d.name AS driver,
+            case when d.clan != '' then d.clan || ' | ' || d.name else d.name end AS driver,
             d.steam_id as steam_id,
             c.name AS car,
-            ARRAY_AGG(sr.time ORDER BY sr.number) AS sector_times
+            ARRAY_AGG(sr.time ORDER BY sr.number) AS sector_times,
+            lr.created_at AS time_of_best_lap
         FROM tsu.lap_results lr
         LEFT JOIN tsu.event_results er ON lr.event_result_id = er.id
         LEFT JOIN tsu.events e ON er.event_id = e.id
@@ -171,8 +186,8 @@ def event(event_id):
         LEFT JOIN tsu.cars c ON er.car_id = c.id
         LEFT JOIN tsu.sector_results sr ON sr.lap_result_id = lr.id
         WHERE e.id = :event_id
-        GROUP BY lr.lap_time, d.name, d.steam_id, d.clan, c.name
-        ORDER BY lr.lap_time ASC
+        GROUP BY lr.lap_time, d.name, d.steam_id, d.clan, c.name, lr.created_at
+        ORDER BY lr.lap_time ASC, lr.created_at ASC
         LIMIT 500
         """
     )
@@ -188,6 +203,7 @@ def event(event_id):
             "car": result[3],
             "lap_time_seconds": result[0],
             "sector_times": [float(time) if time else "N/A" for time in result[4]],
+            "time_of_best_lap": result[5],
         }
         best_laps_overall.append(lap_data)
 
