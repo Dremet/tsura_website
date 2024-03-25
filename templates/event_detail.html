@@ -98,6 +98,11 @@
     <div class="alert alert-danger" role="alert">
         Best theoretical lap time (based on best sector times): <strong>{{ best_theoretical_lap|format_lap_time
             }}</strong>
+        (
+        {% for best_sector_time in best_sector_times %}
+        {{ best_sector_time|format_sector_time }}{{ "," if not loop.last }}
+        {% endfor %}
+        )
     </div>
 
 
