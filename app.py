@@ -194,11 +194,16 @@ def event(event_id):
     ### Best Sector Times ###
     # Initialize a list to store the best time for each sector
     best_sector_times = [float("inf")] * number_sectors
+    print(best_sector_times)
 
     for lap in best_laps_overall:
+        if len(lap["sector_times"]) > number_sectors:
+            continue
+
         for index, sector_time in enumerate(lap["sector_times"]):
             if sector_time != "N/A":
                 sector_time_float = float(sector_time)
+
                 if sector_time_float < best_sector_times[index]:
                     best_sector_times[index] = sector_time_float
 
