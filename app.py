@@ -233,6 +233,7 @@ def event(event_id):
         best_laps_overall=best_laps_overall,
         best_sector_times=best_sector_times,
         best_theoretical_lap=sum_best_sector_times,
+        best_lap_time_seconds=best_laps_overall[0]["lap_time_seconds"],
     )
 
 

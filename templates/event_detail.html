@@ -78,7 +78,14 @@
                         <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
                     </a>
                 </td>
-                <td>{{ lap["best_lap_seconds"]| format_lap_time }}</td>
+                <td>
+                    {{ lap["best_lap_seconds"]| format_lap_time }}
+                    {% if lap["best_lap_seconds"] != best_lap_time_seconds %}
+                    <span style="color:red"> -{{
+                        (lap["best_lap_seconds"]-best_lap_time_seconds)|format_sector_time }}
+                    </span>
+                    {% endif %}
+                </td>
                 {% for sector_index in range(number_sectors) %}
                 {% set sector_time = lap["sector_times"][sector_index] if lap["sector_times"]|length > sector_index else
                 "N/A" %}
