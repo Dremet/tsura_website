@@ -23,12 +23,18 @@ def format_lap_time(seconds):
 
 
 def format_sector_time(seconds):
-    """Converts seconds to SS.SSS format."""
+    """Converts seconds to SS.SSSS format."""
     return f"{float(seconds):06.4f}"
+
+
+def format_diff_time(seconds):
+    """Converts seconds to SS.SSS format."""
+    return f"{float(seconds):05.3f}"
 
 
 app.jinja_env.filters["format_lap_time"] = format_lap_time
 app.jinja_env.filters["format_sector_time"] = format_sector_time
+app.jinja_env.filters["format_diff_time"] = format_diff_time
 
 
 @app.template_filter("split")

@@ -81,8 +81,8 @@
                 <td>
                     {{ lap["best_lap_seconds"]| format_lap_time }}
                     {% if lap["best_lap_seconds"] != best_lap_time_seconds %}
-                    <span style="color:red"> -{{
-                        (lap["best_lap_seconds"]-best_lap_time_seconds)|format_sector_time }}
+                    <span style="color:red"> +{{
+                        (lap["best_lap_seconds"]-best_lap_time_seconds)|format_diff_time }}
                     </span>
                     {% endif %}
                 </td>
