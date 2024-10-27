@@ -11,7 +11,7 @@
     <p>Make sure to read the elo rating description on the landing page.</p>
     <dl class="row">
         <dt class="col-sm-3">Minimum Races</dt>
-        <dd class="col-sm-9">You need to participate in at least 3 races to be shown in the list below. Below 10 is low and shown in red.</dd>
+        <dd class="col-sm-9">You need to participate in at least 3 races to be shown in the list below. Below 10 is unprecise and shown in red. Above 30 is shown as green.</dd>
       
         <dt class="col-sm-3">Trend</dt>
         <dd class="col-sm-9">This is the elo change sum of the last 5 races. Values above 20 are shown as purple and indicate that the driver is still climbing.</dd>
@@ -49,7 +49,9 @@
                     <td>{{ driver.current_elo|round(1) }}</td>
                     <td>
                         {% if driver.race_count < 10 %}
-                            <span style='color:red'>
+                            <span style='color:rgb(158, 0, 0)'>
+                        {% elif driver.race_count >= 30 %}
+                            <span style='color:rgb(43, 117, 0)'>
                         {% else %}
                             <span>
                         {% endif %}
