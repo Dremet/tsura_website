@@ -8,12 +8,13 @@
         TSURA
     </h1>
 
-    <div class="alert alert-danger" role="alert">
+    <div class="alert alert-dark" role="alert">
         <h4 class="alert-heading">Welcome!</h4>
-        <p>This is a new community project that shows hotlapping lap times from the Hotlapping TSU server. After every
-            event the times on this website should be updated within 10 seconds.</p>
+        <p>This is a community project that shows hotlapping lap times from the Hotlapping TSU server and an elo list based on league/event results. 
+            Times driven on the hotlapping server should be updated within 10 seconds after the event ended (when you are back in the menu basically).
+        </p>
         <hr>
-        <p class="mb-0">Whenever you find or suspect a bug, please send a message to André Petersen on discord.</p>
+        <p class="mb-0">Whenever you find or suspect a bug, please send a message to Dremet on discord.</p>
     </div>
 
     <blockquote class="blockquote">
@@ -24,9 +25,44 @@
         </p>
     </blockquote>
 </div>
+
+<div class="container mt-5">
+    <h2 class="display-4">Elo Rating <span class="badge text-bg-danger">New</span></h2>
+    <dl class="row">
+        <dt class="col-sm-3">What is an elo rating?</dt>
+        <dd class="col-sm-9">"The Elo rating system is a method for calculating the relative skill levels of players in zero-sum games such as chess or esports. It is named after its creator Arpad Elo, a Hungarian-American physics professor." - <a href="https://en.wikipedia.org/wiki/Elo_rating_system">Wikipedia</a></dd>
+      
+        <dt class="col-sm-3">Isn't elo only for 2 player games?</dt>
+        <dd class="col-sm-9">Yes but it can be adapted, see <a href="https://towardsdatascience.com/developing-a-generalized-elo-rating-system-for-multiplayer-games-b9b495e87802">here</a> for details. Basically, it calculates an expected score/position for everyone based on everyone's current elo and then checks how far
+        the actual score deviates from the expected score. The deviation is than translated to a win or loss of elo rating.</dd>
+      
+        <dt class="col-sm-3">Which races do count?</dt>
+        <dd class="col-sm-9">Semi-realistic league and event races like F3, GrT, GTE etc. Relatively short (less than 20 minutes) races with reversed grid starts do not count. Hotlapping results do not count. Closed-community events also don't count.</dd>
+            
+        <dt class="col-sm-3">When/How does it update?</dt>
+        <dd class="col-sm-9">
+          It requires a manual processing step. If I (Dremet) participate in a league/event race I will often update it right after the event. If I don't participate, please send me the json result file and I will update it in the following days.
+        </dd>
+
+        <dt class="col-sm-3">What if I miss a race?</dt>
+        <dd class="col-sm-9">
+          Nothing. Elo changes only if you participate in the respective race.
+        </dd>
+
+        <dt class="col-sm-3">Is it perfect?</dt>
+        <dd class="col-sm-9">Obviously, it is not but it should be close to the best possible skill estimation among the community. Drawbacks are "certain numbers of races needed to get to your elo level", "in the short run the number of partitipations might be more important than your skill", "some people might be significantly better with one car than with another" etc.
+            Splitting elo into multiple car classes would decrease the number of data points for each and therefore would make numbers less useful. 
+        </dd>
+      </dl>
+      <div class="d-grid gap-2 col-6 mx-auto">
+        <a href="/elo" class="btn btn-danger btn-lg" tabindex="-1" role="button"
+                        aria-disabled="false"><i class="fa-solid fa-ranking-star"></i> Go to elo rating list</a>
+      </div>
+</div>
+
 <div class="container mt-5">
     <h2 class="display-4">Event List</h2>
-    <div class="alert alert-danger" role="alert">
+    <div class="alert alert-warning" role="alert">
         <i class="fa-solid fa-lightbulb"></i> The latest and currently active event is the first one in the list.
     </div>
     <table class="table table-striped">
@@ -71,15 +107,6 @@
 </div>
 
 <div class="container mt-5">
-    <h2 class="display-4">Season and Prices</h2>
-    <p>
-        Season 1 will feature 10 events. Two participants who have taken part in 80% or more of the weekly hotlapping
-        competitions during Season 1 will be randomly selected. They will have the choice between receiving 3
-        customization packs for the game or a 5€ Steam gift card.
-    </p>
-</div>
-
-<div class="container mt-5">
     <h2 class="display-4">FAQ</h2>
     <div class="accordion" id="accordionExample">
         <div class="accordion-item">
@@ -97,21 +124,6 @@
                     This website displays the data from the result database. If you want to participate, just join the
                     hotlapping server and enjoy, no need to register. Track-Car-Combinations will probably change weekly
                     so that everyone can get a chance to participate.
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                    Plans for future updates?
-                </button>
-            </h2>
-            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    Absolutely! An overall standings list, elo calculation based on results, uploading lap time
-                    recordings along with records, checkpoint times, sophisticated ways to compare cp/sector/lap times,
-                    graphics etc. You have more ideas? Let me know!
                 </div>
             </div>
         </div>

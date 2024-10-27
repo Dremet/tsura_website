@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}TSURA.org - Elo Ranking{% endblock %}
+
+{% block body %}
+<div class="container mt-3">
+    <a href="/" class="btn btn-danger btn-lg" tabindex="-1" role="button" aria-disabled="false"><i
+            class="fa-solid fa-chevron-left"></i> Back to Landing Page</a>
+
+    <h2 class="display-4">Elo Ranking</h2>
+    <p>Make sure to read the elo rating description on the landing page.</p>
+    <dl class="row">
+        <dt class="col-sm-3">Minimum Races</dt>
+        <dd class="col-sm-9">You need to participate in at least 3 races to be shown in the list below. Below 10 is low and shown in red.</dd>
+      
+        <dt class="col-sm-3">Trend</dt>
+        <dd class="col-sm-9">This is the elo change sum of the last 5 races. Values above 20 are shown as purple and indicate that the driver is still climbing.</dd>
+
+        <dt class="col-sm-3">Delta</dt>
+        <dd class="col-sm-9">This is the elo change from the last race considered.</dd>
+
+        <dt class="col-sm-3">Car/Track/UTC</dt>
+        <dd class="col-sm-9">Information about the last race considered</dd>
+    </dl>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th><i class="fa-solid fa-ranking-star"></i></th>
+                <th><i class="fa-solid fa-id-card"></i> Driver</th>
+                <th><i class="fa-solid fa-gauge"></i> Elo</th>
+                <th><i class="fa-solid fa-hashtag"></i>&nbsp;Races</th>
+                <th><i class="fa-solid fa-arrow-trend-up"></i> Trend</th>
+                <th><i class="fa-solid fa-plus-minus"></i> Delta</th>
+                <th><i class="fa-solid fa-car-side"></i> Car</th>
+                <th><i class="fa-solid fa-road"></i> Track</th>
+                <th>
+                    <i class="fa-solid fa-clock"></i>&nbsp;UTC&nbsp;
+                    <a href='https://time.is/UTC' target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
+                    </a>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for driver in data %}
+                <tr>
+                    <td>{{ driver.position }}</td>
+                    <td>{{ driver.driver_name }}</td>
+                    <td>{{ driver.current_elo|round(1) }}</td>
+                    <td>
+                        {% if driver.race_count < 10 %}
+                            <span style='color:red'>
+                        {% else %}
+                            <span>
+                        {% endif %}
+                        {{ driver.race_count }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if driver.trend > 20 %}
+                            <span style='color:rgb(195, 0, 255)'>
+                        {% else %}
+                            <span>
+                        {% endif %}
+                        {{ driver.trend|round(1) }}
+                        </span></td>
+                    <td>{{ driver.last_delta|round(1) }}</td>
+                    <td>{{ driver.last_car_name }}</td>
+                    <td>{{ driver.last_track_name }}</td>
+                    <td>{{ driver.last_race_timestamp }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

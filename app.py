@@ -67,6 +67,72 @@ def home():
     return render_template("index.html", data=data)
 
 
+@app.route("/elo")
+def elo():
+    sql_query = text(
+        """
+        WITH latest_elo AS (
+            SELECT
+                e.driver_id,
+                e.value AS current_elo,
+                e.number_races,
+                e.delta AS last_delta,
+                e.last_timestamp,
+                e.last_track_name,
+                e.last_car_name,
+                ROW_NUMBER() OVER (PARTITION BY e.driver_id ORDER BY e.last_timestamp DESC) AS rn
+            FROM
+                tsu.elo e
+        ),
+        latest_elo_filtered AS (
+            SELECT *
+            FROM latest_elo
+            WHERE rn = 1
+        ),
+        elo_trend AS (
+            SELECT
+                e.driver_id,
+                SUM(e.delta) AS trend_sum -- Sum of the last 5 deltas
+            FROM (
+                SELECT
+                    e.driver_id,
+                    e.delta,
+                    ROW_NUMBER() OVER (PARTITION BY e.driver_id ORDER BY e.last_timestamp DESC) AS race_rank
+                FROM
+                    tsu.elo e
+            ) e
+            WHERE e.race_rank <= 5 -- Only include the last 5 races per driver
+            GROUP BY
+                e.driver_id
+        )
+        SELECT
+            RANK() OVER (ORDER BY le.current_elo DESC) AS position,
+            d.name AS driver_name,
+            le.current_elo,
+            le.number_races AS race_count,
+            et.trend_sum AS trend, -- Sum of the last 5 deltas
+            le.last_delta,
+            le.last_timestamp AS last_race_timestamp,
+            le.last_track_name AS last_track_name,
+            le.last_car_name AS last_car_name
+        FROM
+            latest_elo_filtered le
+        JOIN
+            tsu.drivers d ON le.driver_id = d.id
+        JOIN
+            elo_trend et ON le.driver_id = et.driver_id
+        WHERE
+            le.number_races >= 3
+        ORDER BY
+            position;
+        """
+    )
+
+    result = db.session.execute(sql_query)
+    data = [row for row in result]
+    return render_template("elo_list.html", data=data)
+
+
 @app.route("/event/<int:event_id>")
 def event(event_id):
     ### EVENT DETAILS ###
