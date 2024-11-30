@@ -10,8 +10,8 @@
 
     <div class="alert alert-dark" role="alert">
         <h4 class="alert-heading">Welcome!</h4>
-        <p>This is a community project that shows hotlapping lap times from the Hotlapping TSU server and an elo list based on league/event results. 
-            Times driven on the hotlapping server should be updated within 10 seconds after the event ended (when you are back in the menu basically).
+        <p>This is a community project that shows hotlapping lap times from the Hotlapping TSU server, an elo list based on league/event results as well as a elo list based on races on the TripleHeat server. 
+            Times driven on the hotlapping server should be updated within 10 seconds after the event ended (when you are back in the menu basically). For the TripleHeat server it takes up to a minute.
         </p>
         <hr>
         <p class="mb-0">Whenever you find or suspect a bug, please send a message to Dremet on discord.</p>
@@ -27,7 +27,45 @@
 </div>
 
 <div class="container mt-5">
-    <h2 class="display-4">Elo Rating <span class="badge text-bg-danger">New</span></h2>
+    <h2 class="display-4">Menu</h2>
+    <div class="row text-center d-flex align-items-stretch">
+        <!-- Box 1: Hotlapping -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h3 class="card-title">Hotlapping</h3>
+                    <p class="card-text">View the latest hotlapping results and participate in the competition.</p>
+                    <a href="/hotlapping" class="btn btn-danger btn-lg">Go to Hotlapping</a>
+                </div>
+            </div>
+        </div>
+        <!-- Box 2: League/Event Elo -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h3 class="card-title">League/Event Elo</h3>
+                    <p class="card-text">Check out the Elo ratings for league and event races.</p>
+                    <a href="/elo" class="btn btn-danger btn-lg">Go to League/Event Elo</a>
+                </div>
+            </div>
+        </div>
+        <!-- Box 3: TripleHeat Elo -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h3 class="card-title">TripleHeat Elo</h3>
+                    <p class="card-text">Explore Elo ratings based on races on the TripleHeat server.</p>
+                    <a href="/elo_heat" class="btn btn-danger btn-lg">Go to TripleHeat Elo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="container mt-5">
+    <h2 class="display-4">Elo Rating</h2>
     <dl class="row">
         <dt class="col-sm-3">What is an elo rating?</dt>
         <dd class="col-sm-9">"The Elo rating system is a method for calculating the relative skill levels of players in zero-sum games such as chess or esports. It is named after its creator Arpad Elo, a Hungarian-American physics professor." - <a href="https://en.wikipedia.org/wiki/Elo_rating_system">Wikipedia</a></dd>
@@ -54,57 +92,8 @@
             Splitting elo into multiple car classes would decrease the number of data points for each and therefore would make numbers less useful. 
         </dd>
       </dl>
-      <div class="d-grid gap-2 col-6 mx-auto">
-        <a href="/elo" class="btn btn-danger btn-lg" tabindex="-1" role="button"
-                        aria-disabled="false"><i class="fa-solid fa-ranking-star"></i> Go to elo rating list</a>
-      </div>
 </div>
 
-<div class="container mt-5">
-    <h2 class="display-4">Event List</h2>
-    <div class="alert alert-warning" role="alert">
-        <i class="fa-solid fa-lightbulb"></i> The latest and currently active event is the first one in the list.
-    </div>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th><i class="fa-solid fa-list-ol"></i> ID</th>
-                <th><i class="fa-solid fa-road"></i> Track</th>
-                <th><i class="fa-solid fa-car-side"></i> Car(s)</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in data %}
-            <tr>
-                <td>{{ row[0] }}</td>
-                <td>
-                    {{ row[1] }}&nbsp;
-                    <a href='https://steamcommunity.com/workshop/browse/?appid=1478340&searchtext=%22{{ row[1]| replace(" ", "+") }}%22'
-                        target="_blank">
-                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
-                    </a>
-                </td>
-                <td>
-                    {% set cars = row[2] | split(',') %}
-                    {% for car in cars %}
-                    {{ car }}&nbsp;
-                    <a href='https://steamcommunity.com/workshop/browse/?appid=1478340&searchtext=%22{{ car| replace(" ", "+") }}%22'
-                        target="_blank">
-                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
-                    </a>
-                    <br />
-                    {% endfor %}
-                </td>
-                <td>
-                    <a href="/event/{{ row[0] }}" class="btn btn-danger btn-lg" tabindex="-1" role="button"
-                        aria-disabled="false"><i class="fa-solid fa-eye"></i> Results</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
 
 <div class="container mt-5">
     <h2 class="display-4">FAQ</h2>
@@ -122,8 +111,9 @@
                     automatically processed and times are written to a database right after each hotlapping session is
                     over (roughly every 5 minutes).
                     This website displays the data from the result database. If you want to participate, just join the
-                    hotlapping server and enjoy, no need to register. Track-Car-Combinations will probably change weekly
+                    hotlapping server and enjoy, no need to register. Track-Car-Combinations will usually change weekly
                     so that everyone can get a chance to participate.
+                    You can also join the TripleHeat races on Monday, Wednesday and Friday at 9pm CET/CEST.
                 </div>
             </div>
         </div>

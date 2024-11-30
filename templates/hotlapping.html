@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}TSURA.org - Elo Ranking{% endblock %}
+
+{% block body %}
+<div class="container mt-3">
+    <a href="/" class="btn btn-danger btn-lg" tabindex="-1" role="button" aria-disabled="false"><i
+            class="fa-solid fa-chevron-left"></i> Back to Landing Page</a>
+
+    <h2 class="display-4">Hotlapping</h2>
+
+    <p>In order to participate in the hotlapping events simply join the hotlapping server which you will find in the server list. After each event, the times will update on the website after 10-20 seconds.</p>
+    
+</div>
+
+<div class="container mt-5">
+    <h2 class="display-4">Event List</h2>
+    <div class="alert alert-warning" role="alert">
+        <i class="fa-solid fa-lightbulb"></i> The latest and currently active event is the first one in the list.
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th><i class="fa-solid fa-list-ol"></i> ID</th>
+                <th><i class="fa-solid fa-road"></i> Track</th>
+                <th><i class="fa-solid fa-car-side"></i> Car(s)</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                <td>{{ row[0] }}</td>
+                <td>
+                    {{ row[1] }}&nbsp;
+                    <a href='https://steamcommunity.com/workshop/browse/?appid=1478340&searchtext=%22{{ row[1]| replace(" ", "+") }}%22'
+                        target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
+                    </a>
+                </td>
+                <td>
+                    {% set cars = row[2] | split(',') %}
+                    {% for car in cars %}
+                    {{ car }}&nbsp;
+                    <a href='https://steamcommunity.com/workshop/browse/?appid=1478340&searchtext=%22{{ car| replace(" ", "+") }}%22'
+                        target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
+                    </a>
+                    <br />
+                    {% endfor %}
+                </td>
+                <td>
+                    <a href="/event/{{ row[0] }}" class="btn btn-danger btn-lg" tabindex="-1" role="button"
+                        aria-disabled="false"><i class="fa-solid fa-eye"></i> Results</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
