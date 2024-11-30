@@ -74,4 +74,17 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#eloTable').DataTable({
+            "order": [[2, "desc"]],  // Initial sort on Elo column, descending
+            "columnDefs": [
+                { "type": "num", "targets": [0, 2, 3, 4, 5] }  // Treat columns as numbers
+            ],
+            "paging": false  // Disable pagination
+        });
+    });
+</script>
 {% endblock %}
