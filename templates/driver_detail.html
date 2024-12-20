@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Driver Details - {{ driver_name }}{% endblock %}
+
+{% block body %}
+<div class="container mt-3">
+    <a href="/elo_heat" class="btn btn-danger btn-lg" tabindex="-1" role="button" aria-disabled="false">
+        <i class="fa-solid fa-chevron-left"></i> Back to Heat Elo Ranking
+    </a>
+    <a href="/elo" class="btn btn-danger btn-lg" tabindex="-1" role="button" aria-disabled="false">
+        <i class="fa-solid fa-chevron-left"></i> Back to League/Event Elo Ranking
+    </a>
+    <h2 class="display-4">ELO Progress for {{ driver_name }}</h2>
+
+    <!-- Heat ELO Graph -->
+    <h3>Heat ELO</h3>
+    {% if not heat_data %}
+        <div class="alert alert-warning mt-3" role="alert">
+            No Heat ELO data found for {{ driver_name }}.
+        </div>
+    {% else %}
+        <div class="container mt-3" style="max-width: 800px; height: 400px;">
+            <canvas id="heatEloChart"></canvas>
+        </div>
+    {% endif %}
+
+    <!-- League/Event ELO Graph -->
+    <h3>League/Event ELO</h3>
+    {% if not league_data %}
+        <div class="alert alert-warning mt-3" role="alert">
+            No League/Event ELO data found for {{ driver_name }}.
+        </div>
+    {% else %}
+        <div class="container mt-3" style="max-width: 800px; height: 400px;">
+            <canvas id="leagueEloChart"></canvas>
+        </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/luxon@3.4.3/build/global/luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.1"></script>
+
+<script>
+    // Heat ELO Data
+    const heatData = {{ heat_data | tojson }};
+    if (heatData && heatData.length > 0) {
+        const heatTimestamps = heatData.map(entry => new Date(entry.timestamp));
+        const heatEloValues = heatData.map(entry => entry.elo);
+        const heatRaceCounts = heatData.map(entry => entry.race_count);
+        const heatTrackNames = heatData.map(entry => entry.track_name);
+        const heatCarNames = heatData.map(entry => entry.car_name);
+
+        const heatCtx = document.getElementById('heatEloChart');
+        if (heatCtx) {
+            new Chart(heatCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: heatTimestamps,
+                    datasets: [{
+                        label: 'Heat ELO Progress',
+                        data: heatEloValues,
+                        borderColor: 'red',
+                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                        fill: true,
+                        pointBackgroundColor: 'red',
+                        pointHoverBackgroundColor: 'blue',
+                        pointHoverBorderWidth: 2
+                    }]
+                },
+                options: {
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const date = new Date(tooltipItems[0].label);
+                                    return date.toLocaleString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                    });
+                                },
+                                label: function(tooltipItem) {
+                                    const index = tooltipItem.dataIndex;
+                                    return `ELO: ${heatEloValues[index].toFixed(1)} Races: ${heatRaceCounts[index]} Track: ${heatTrackNames[index]} Car: ${heatCarNames[index]}`;
+                                }
+                            }
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    day: 'MMM d, yyyy'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'ELO'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // League/Event ELO Data
+    const leagueData = {{ league_data | tojson }};
+    if (leagueData && leagueData.length > 0) {
+        const leagueTimestamps = leagueData.map(entry => new Date(entry.timestamp));
+        const leagueEloValues = leagueData.map(entry => entry.elo);
+        const leagueRaceCounts = leagueData.map(entry => entry.race_count);
+        const leagueTrackNames = leagueData.map(entry => entry.track_name);
+        const leagueCarNames = leagueData.map(entry => entry.car_name);
+
+        const leagueCtx = document.getElementById('leagueEloChart');
+        if (leagueCtx) {
+            new Chart(leagueCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: leagueTimestamps,
+                    datasets: [{
+                        label: 'League/Event ELO Progress',
+                        data: leagueEloValues,
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                        fill: true,
+                        pointBackgroundColor: 'blue',
+                        pointHoverBackgroundColor: 'red',
+                        pointHoverBorderWidth: 2
+                    }]
+                },
+                options: {
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const date = new Date(tooltipItems[0].label);
+                                    return date.toLocaleString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                    });
+                                },
+                                label: function(tooltipItem) {
+                                    const index = tooltipItem.dataIndex;
+                                    return `ELO: ${leagueEloValues[index].toFixed(1)} Races: ${leagueRaceCounts[index]} Track: ${leagueTrackNames[index]} Car: ${leagueCarNames[index]}`;
+                                }
+                            }
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    day: 'MMM d, yyyy'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'ELO'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+</script>
+
+{% endblock %}

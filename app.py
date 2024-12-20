@@ -375,5 +375,53 @@ def event(event_id):
     )
 
 
+@app.route("/driver/<string:driver_name>")
+def driver_detail(driver_name):
+    # Query for Heat ELO
+    heat_sql_query = text(
+        """
+        SELECT
+            e.value AS elo,
+            e.number_races AS race_count,
+            e.last_timestamp AS timestamp,
+            e.last_track_name AS track_name,
+            e.last_car_name AS car_name
+        FROM tsu.elo_heat e
+        JOIN tsu.drivers d ON e.driver_id = d.id
+        WHERE d.name = :driver_name
+        ORDER BY e.last_timestamp ASC;
+        """
+    )
+    heat_data = db.session.execute(heat_sql_query, {"driver_name": driver_name}).fetchall()
+    heat_data = [row._asdict() for row in heat_data]
+
+    # Query for League/Event ELO
+    league_sql_query = text(
+        """
+        SELECT
+            e.value AS elo,
+            e.number_races AS race_count,
+            e.last_timestamp AS timestamp,
+            e.last_track_name AS track_name,
+            e.last_car_name AS car_name
+        FROM tsu.elo e
+        JOIN tsu.drivers d ON e.driver_id = d.id
+        WHERE d.name = :driver_name
+        ORDER BY e.last_timestamp ASC;
+        """
+    )
+    league_data = db.session.execute(league_sql_query, {"driver_name": driver_name}).fetchall()
+    league_data = [row._asdict() for row in league_data]
+
+    # Render template with both datasets
+    return render_template(
+        "driver_detail.html",
+        driver_name=driver_name,
+        heat_data=heat_data,
+        league_data=league_data
+    )
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)

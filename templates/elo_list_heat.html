@@ -45,7 +45,9 @@
             {% for driver in data %}
                 <tr>
                     <td>{{ driver.position }}</td>
-                    <td>{{ driver.driver_name }}</td>
+                    <td>
+                        <a href="/driver/{{ driver.driver_name }}">{{ driver.driver_name }}</a>
+                    </td>                    
                     <td>{{ driver.current_elo|round(1) }}</td>
                     <td>
                         {% if driver.race_count < 10 %}
