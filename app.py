@@ -47,6 +47,7 @@ def split_filter(s, delimiter=None):
 def home():
     return render_template("index.html")
 
+
 @app.route("/hotlapping")
 def hotlapping():
     sql_query = text(
@@ -69,6 +70,7 @@ def hotlapping():
     # col_names = result.keys()
     data = [row for row in result]
     return render_template("hotlapping.html", data=data)
+
 
 @app.route("/elo")
 def elo():
@@ -198,6 +200,7 @@ def elo_heat():
     result = db.session.execute(sql_query)
     data = [row for row in result]
     return render_template("elo_list_heat.html", data=data)
+
 
 @app.route("/event/<int:event_id>")
 def event(event_id):
@@ -392,7 +395,9 @@ def driver_detail(driver_name):
         ORDER BY e.last_timestamp ASC;
         """
     )
-    heat_data = db.session.execute(heat_sql_query, {"driver_name": driver_name}).fetchall()
+    heat_data = db.session.execute(
+        heat_sql_query, {"driver_name": driver_name}
+    ).fetchall()
     heat_data = [row._asdict() for row in heat_data]
 
     # Query for League/Event ELO
@@ -410,7 +415,9 @@ def driver_detail(driver_name):
         ORDER BY e.last_timestamp ASC;
         """
     )
-    league_data = db.session.execute(league_sql_query, {"driver_name": driver_name}).fetchall()
+    league_data = db.session.execute(
+        league_sql_query, {"driver_name": driver_name}
+    ).fetchall()
     league_data = [row._asdict() for row in league_data]
 
     # Render template with both datasets
@@ -418,9 +425,13 @@ def driver_detail(driver_name):
         "driver_detail.html",
         driver_name=driver_name,
         heat_data=heat_data,
-        league_data=league_data
+        league_data=league_data,
     )
 
+
+@app.route("/ai_tokens")
+def ai_tokens():
+    return render_template("ai_token_assignment.html", message=None)
 
 
 if __name__ == "__main__":
