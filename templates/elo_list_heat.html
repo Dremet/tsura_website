@@ -11,10 +11,12 @@
     <p>Make sure to read the elo rating description on the landing page.</p>
     <dl class="row">
         <dt class="col-sm-3">Minimum Races</dt>
-        <dd class="col-sm-9">In contrast to the league/event elo list, there is no minimum number of races need to be shown on the list.</dd>
-      
+        <dd class="col-sm-9">In contrast to the league/event elo list, there is no minimum number of races need to be
+            shown on the list.</dd>
+
         <dt class="col-sm-3">Trend</dt>
-        <dd class="col-sm-9">This is the elo change sum of the last 5 races. Values above 20 are shown as purple and indicate that the driver is still climbing.</dd>
+        <dd class="col-sm-9">This is the elo change sum of the last 5 races. Values above 20 are shown as purple and
+            indicate that the driver is still climbing.</dd>
 
         <dt class="col-sm-3">Delta</dt>
         <dd class="col-sm-9">This is the elo change from the last race considered.</dd>
@@ -43,36 +45,36 @@
         </thead>
         <tbody>
             {% for driver in data %}
-                <tr>
-                    <td>{{ driver.position }}</td>
-                    <td>
-                        <a href="/driver/{{ driver.driver_name }}">{{ driver.driver_name }}</a>
-                    </td>                    
-                    <td>{{ driver.current_elo|round(1) }}</td>
-                    <td>
-                        {% if driver.race_count < 10 %}
-                            <span style='color:rgb(158, 0, 0)'>
+            <tr>
+                <td>{{ driver.position }}</td>
+                <td>
+                    <a href="/driver/{{ driver.driver_name }}">{{ driver.driver_name }}</a>
+                </td>
+                <td>{{ driver.current_elo|round(1) }}</td>
+                <td data-sort="{{ driver.race_count }}">
+                    {% if driver.race_count < 10 %} <span style='color:rgb(158, 0, 0)'>
                         {% elif driver.race_count >= 30 %}
-                            <span style='color:rgb(43, 117, 0)'>
-                        {% else %}
+                        <span style='color:rgb(43, 117, 0)'>
+                            {% else %}
                             <span>
-                        {% endif %}
-                        {{ driver.race_count }}
+                                {% endif %}
+                                {{ driver.race_count }}
+                            </span>
+                </td>
+                <td data-sort="{{ driver.trend }}">
+                    {% if driver.trend > 20 %}
+                    <span style='color:rgb(195, 0, 255)'>
+                        {% else %}
+                        <span>
+                            {% endif %}
+                            {{ driver.trend|round(1) }}
                         </span>
-                    </td>
-                    <td>
-                        {% if driver.trend > 20 %}
-                            <span style='color:rgb(195, 0, 255)'>
-                        {% else %}
-                            <span>
-                        {% endif %}
-                        {{ driver.trend|round(1) }}
-                        </span></td>
-                    <td>{{ driver.last_delta|round(1) }}</td>
-                    <td>{{ driver.last_car_name }}</td>
-                    <td>{{ driver.last_track_name }}</td>
-                    <td>{{ driver.last_race_timestamp }}</td>
-                </tr>
+                </td>
+                <td>{{ driver.last_delta|round(1) }}</td>
+                <td>{{ driver.last_car_name }}</td>
+                <td>{{ driver.last_track_name }}</td>
+                <td>{{ driver.last_race_timestamp }}</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
