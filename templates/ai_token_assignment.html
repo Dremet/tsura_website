@@ -19,23 +19,73 @@
             color: red;
         }
 
-        .tokens {
+        #tokens-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: white;
+            color: black;
+            padding: 10px 15px;
+            border: 2px solid red;
+            border-radius: 8px;
             font-size: 1.2rem;
-            margin-bottom: 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            cursor: grab;
         }
 
-        .tokens.negative {
-            color: red;
+        #tokens-container:active {
+            cursor: grabbing;
         }
 
-        .warning {
-            color: red;
-            font-size: 0.9rem;
-            display: none;
+        #tokens-container .warning {
+            color: red; /* Text color for the warning */
+            font-size: 0.9rem; /* Slightly smaller font */
+            margin-top: 5px; /* Space below tokens */
+            display: none; /* Hidden by default */
         }
 
         button {
             margin-top: 20px;
+        }
+
+        .description {
+            font-size: 0.9rem;
+            color: gray;
+            margin-top: 5px;
+        }
+
+        /* Grey slider track */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #D0D0D0; /* Grey track */
+            border-radius: 5px;
+            outline: none;
+        }
+
+        /* For Webkit browsers (Chrome, Safari) */
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #D0D0D0; /* Grey track */
+            height: 8px;
+            border-radius: 5px;
+        }
+
+        /* For Firefox */
+        input[type="range"]::-moz-range-track {
+            background: #D0D0D0; /* Grey track */
+            height: 8px;
+            border-radius: 5px;
+        }
+
+        /* For Internet Explorer */
+        input[type="range"]::-ms-track {
+            background: #D0D0D0; /* Grey track */
+            height: 8px;
+            border-radius: 5px;
+            border-color: transparent; /* Hide default borders */
+            color: transparent; /* Hide default tick marks */
         }
     </style>
 </head>
@@ -44,18 +94,32 @@
     <div class="container">
         <div class="alert alert-warning text-center" role="alert">
             You can spend your tokens to improve or change the behaviour of your AI driver in the races. Screenshot when
-            you are done and send it to Igiava.
+            you are done and send it to Igiava via <a href="https://forms.gle/Jg8BN5PYHb5UyXLd8">this form</a>.
         </div>
         <h1 class="text-center">AI Parameter Adjustment</h1>
-        <div class="tokens">Remaining Tokens: <span id="tokens">200</span></div>
-        <p class="warning" id="warning">Warning: You have exceeded your token limit!</p>
+        <div id="tokens-container">
+            <div>Remaining Tokens: <span id="tokens">5000</span></div>
+            <div id="warning" class="warning" style="display: none;">Warning: You have exceeded your token limit!</div>
+        </div>        
 
+        <!-- Speed Parameters -->
         <div class="section" id="speed-section">
             <h2>Speed Parameters</h2>
         </div>
 
-        <div class="section" id="preference-section">
-            <h2>Preference Parameters</h2>
+        <!-- Cornering Parameters -->
+        <div class="section" id="cornering-section">
+            <h2>Cornering Parameters</h2>
+        </div>
+
+        <!-- Path Following Parameters (Free) -->
+        <div class="section" id="path-section">
+            <h2>Path Following Parameters (Free)</h2>
+        </div>
+
+        <!-- Wheel-to-Wheel Parameters (Free) -->
+        <div class="section" id="wheel-section">
+            <h2>Wheel-to-wheel Parameters (Free)</h2>
         </div>
 
         <div class="text-center">
@@ -67,83 +131,110 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const parameters = [
-            { name: "Slowdown %₀₀", category: "Speed", min: 0, max: 1000, default: 50, costs: 10 },
-            { name: "Min Driving Line Quality", category: "Preference", min: 0, max: 100, default: 60, costs: 5 },
-            { name: "Max Driving Line Quality", category: "Preference", min: 0, max: 100, default: 100, costs: 5 },
-            { name: "Max Quality Range Narrowing", category: "Preference", min: 0, max: 1000, default: 50, costs: 3 },
-            { name: "Ignore Slowdown Probability %₀₀", category: "Speed", min: 0, max: 1000, default: 0, costs: 3 },
-            { name: "Overspeed Probability %₀₀", category: "Speed", min: 0, max: 1000, default: 0, costs: 3 },
-            { name: "Limit Oversteering Probability %₀₀", category: "Speed", min: 0, max: 1000, default: 0, costs: 3 },
-            { name: "Stuck Time Limit", category: "Preference", min: 1, max: 10, default: 5, costs: 2 },
-            { name: "Distance for Full Correction", category: "Preference", min: 1, max: 50, default: 25, costs: 2 },
-            { name: "Lateral Avoidance", category: "Preference", min: 0, max: 10, default: 4, costs: 2 },
-            { name: "Overtake Time", category: "Preference", min: 0, max: 5, default: 3, costs: 2 },
-            { name: "Overtake Space", category: "Preference", min: 1, max: 10, default: 3, costs: 2 },
-            { name: "Random Path Variation", category: "Preference", min: 0, max: 200, default: 20, costs: 2 }
+            // Speed Parameters
+            { name: "Slowdown ‰", category: "Speed", min: 0, max: 40, default: 40, costs: 75, reverseCost: true, description: "Defines how much slower than the max speed the AI drives, in permille. 10‰ = 1%, 100‰ = 10%." },
+            { name: "Overspeed Probability ‰", category: "Speed", min: 0, max: 100, default: 100, costs: 30, reverseCost: true, description: "Probability of the AI forgetting to brake, in permille." },
+            { name: "Slowdown Ignore Probability ‰", category: "Speed", min: 0, max: 1000, default: 0, costs: 2.85, description: "Probability of the AI ignoring slowdown settings for a small amount of time, in permille. Token cost depends on existing slowdown." },
+
+            // Cornering Parameters
+            { name: "Oversteering Limit ‰", category: "Cornering", min: 0, max: 1000, default: 1000, costs: 3, reverseCost: true, description: "Probability of the AI not oversteering in a given corner, in permille. AI slightly relies on oversteering to turn." },
+            { name: "Min Driving Line Quality", category: "Cornering", min: 0, max: 100, default: 0, step: 2, costs: 10, description: "Minimum quality of driving lines AI uses. 0 = worst existing lines may be used, 50 = better half of existing lines, closer to max = stricter." },
+            { name: "Max Driving Line Quality", category: "Cornering", min: 20, max: 100, default: 20, step: 2, costs: 10, description: "Maximum quality of driving lines AI uses. 50 = worst half of existing lines, 100 = best existing lines may be used, further from min = broader range." },
+
+            // Path Following Parameters (Free)
+            { name: "Stuck Time Limit", category: "Path", min: 1, max: 10, default: 5, costs: 0, description: "Time limit (in seconds) before AI considers itself stuck and respawns. Too low values may cause respawning in unnecessary conditions." },
+            { name: "Distance for Full Correction", category: "Path", min: 5, max: 50, default: 25, costs: 0, description: "Distance in metres from the line AI needs to drive perpendicularly towards the track. Too low values may cause the car to zigzag, too high may cause the car not to react to being off-road." },
+            { name: "Random Path Variation", category: "Path", min: 0, max: 200, default: 50, costs: 0, description: "Distance in centimetres, up to which the AI randomly varies its path position for variety. Higher values increase variation but risk collisions." },
+
+            // Wheel-to-Wheel Parameters (Free)
+            { name: "Lateral Avoidance", category: "Wheel", min: 0, max: 10, default: 6, costs: 0, description: "Determines how much space the AI gives when driving side-by-side or avoiding side collisions, in half-metres. 1 = 0.5m, 10 = 5m." },
+            { name: "Overtake Time", category: "Wheel", min: 0, max: 5, default: 3, costs: 0, description: "Determines how much time before collision with the car in front the AI starts to move away from it or to initiate overtaking manoeuvre. Zero means that overtaking is never initiated." },
+            { name: "Overtake Space", category: "Wheel", min: 1, max: 10, default: 5, costs: 0, description: "Determines how much to the side the AI moves when initiating overtaking manoeuvre, in quarter-metres. 1 = 0.25m, 10 = 2.5m." }
         ];
 
-        let tokens = 200;
+        let tokens = 5000;
         const tokensDisplay = document.getElementById("tokens");
         const warning = document.getElementById("warning");
-
+        
         function updateTokens() {
-            tokensDisplay.textContent = tokens;
+            tokensDisplay.textContent = tokens.toFixed(tokens % 1 === 0 ? 0 : 5); // Round if necessary
+            const warning = document.getElementById("warning");
+
             if (tokens < 0) {
-                tokensDisplay.classList.add("negative");
-                warning.textContent = "Warning: You have exceeded your token limit!";
-                warning.style.display = "block";
-            } else if (tokens === 0) {
-                tokensDisplay.classList.remove("negative");
-                warning.textContent = "You assigned all tokens.";
-                warning.style.display = "block";
+                warning.style.display = "block"; // Show the warning
             } else {
-                tokensDisplay.classList.remove("negative");
-                warning.textContent = "Assign points.";
-                warning.style.display = "block";
+                warning.style.display = "none"; // Hide the warning
             }
         }
+
 
         function resetAll() {
             parameters.forEach(param => {
                 const slider = document.getElementById(param.name);
                 slider.value = param.default;
+                const input = document.getElementById(`${param.name}-input`);
+                input.value = param.default;
                 document.getElementById(`${param.name}-value`).textContent = `Current: ${param.default}`;
             });
-            tokens = 200;
+            tokens = 5000;
             updateTokens();
         }
 
-        function resetParameter(name) {
-            const slider = document.getElementById(name);
-            const param = parameters.find(param => param.name === name);
-            slider.value = param.default;
-            document.getElementById(`${param.name}-value`).textContent = `Current: ${param.default}`;
-            tokens = 200;
-            updateTokens();
-        }
+        const tokensContainer = document.getElementById("tokens-container");
 
-        function updateSlider(slider) {
-            const param = parameters.find(p => p.name === slider.id);
-            const currentValue = parseInt(slider.value);
-            const defaultValue = param.default;
-            const difference = currentValue - defaultValue;
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
 
-            let adjustment;
-            if (param.name === "Slowdown %₀₀" || param.name === "Stuck Time Limit" || param.name === "Distance for Full Correction") {
-                adjustment = -difference * param.costs;
-            } else {
-                adjustment = difference * param.costs;
+        tokensContainer.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            offsetX = e.clientX - tokensContainer.getBoundingClientRect().left;
+            offsetY = e.clientY - tokensContainer.getBoundingClientRect().top;
+            tokensContainer.style.cursor = "grabbing";
+
+            // Reset conflicting styles
+            tokensContainer.style.right = "auto";
+            tokensContainer.style.bottom = "auto";
+        });
+
+        document.addEventListener("mousemove", (e) => {
+            if (isDragging) {
+                const newX = e.clientX - offsetX;
+                const newY = e.clientY - offsetY;
+
+                tokensContainer.style.left = `${newX}px`;
+                tokensContainer.style.top = `${newY}px`;
             }
+        });
 
-            tokens = 200 - parameters.reduce((total, p) => {
-                const slider = document.getElementById(p.name);
-                const value = parseInt(slider.value);
-                const diff = value - p.default;
-                return total + (p.name === "Slowdown %₀₀" || p.name === "Stuck Time Limit" || p.name === "Distance for Full Correction" ? -diff * p.costs : diff * p.costs);
-            }, 0);
+        document.addEventListener("mouseup", () => {
+            if (isDragging) {
+                isDragging = false;
+                tokensContainer.style.cursor = "grab";
+            }
+        });
 
-            document.getElementById(`${param.name}-value`).textContent = `Current: ${slider.value}`;
-            updateTokens();
+
+        function updateCostLabels() {
+            parameters.forEach(param => {
+                const label = document.querySelector(`label[for='${param.name}']`);
+                if (param.reverseCost) {
+                    // Add "per unit removal" for reverseCost parameters
+                    label.textContent = `${param.name} (Cost: ${param.costs} tokens/unit removal)`;
+                } else {
+                    if (param.step > 1)
+                    {
+                        label.textContent = `${param.name} (Cost: ${param.costs * param.step} tokens/2 units)`;
+                    } else {
+                        if ((param.category === "Path") || (param.category === "Wheel"))
+                        {
+                            label.textContent = `${param.name}`
+                        } else {
+                            label.textContent = `${param.name} (Cost: ${param.costs} tokens/unit)`;
+                        }
+                    }
+                }
+            });
         }
 
         function createSlider(param) {
@@ -153,15 +244,21 @@
             const labelCol = document.createElement("div");
             labelCol.className = "col-md-6";
             const label = document.createElement("label");
-            label.textContent = `${param.name} (Cost: ${param.costs}/unit)`;
+            label.textContent = `${param.name} (Cost: ${param.costs} tokens/unit${param.reverseCost ? ' removal' : ''})`;
             label.htmlFor = param.name;
             labelCol.appendChild(label);
 
+            const description = document.createElement("div");
+            description.className = "description";
+            description.textContent = param.description;
+            labelCol.appendChild(description);
+
             const sliderCol = document.createElement("div");
+            sliderCol.className = "col-md-4";
+
             const inputContainer = document.createElement("div");
             inputContainer.style.display = "flex";
             inputContainer.style.alignItems = "center";
-            sliderCol.className = "col-md-4";
 
             const slider = document.createElement("input");
             slider.type = "range";
@@ -170,23 +267,26 @@
             slider.min = param.min;
             slider.max = param.max;
             slider.value = param.default;
-            slider.oninput = () => updateSlider(slider);
-            inputContainer.appendChild(slider);
+            slider.step = param.step || 1;
+            slider.oninput = () => {
+                numberInput.value = slider.value;
+                updateSlider(slider);
+            };
+
             const numberInput = document.createElement("input");
             numberInput.type = "number";
-            numberInput.value = param.default;
+            numberInput.id = `${param.name}-input`;
             numberInput.min = param.min;
             numberInput.max = param.max;
+            numberInput.value = param.default;
             numberInput.style.marginLeft = "10px";
             numberInput.style.width = "60px";
             numberInput.oninput = () => {
                 slider.value = numberInput.value;
                 updateSlider(slider);
             };
-            slider.oninput = () => {
-                numberInput.value = slider.value;
-                updateSlider(slider);
-            };
+
+            inputContainer.appendChild(slider);
             inputContainer.appendChild(numberInput);
             sliderCol.appendChild(inputContainer);
 
@@ -202,7 +302,44 @@
             const resetButton = document.createElement("button");
             resetButton.textContent = "Reset";
             resetButton.className = "btn btn-danger btn-sm";
-            resetButton.onclick = () => resetParameter(param.name);
+            resetButton.onclick = () => {
+                slider.value = param.default; // Reset slider to default
+                numberInput.value = param.default; // Reset input to default
+                valueDisplay.textContent = `Current: ${param.default}`; // Update display
+
+                if (param.name === "Max Driving Line Quality") {
+                    // Ensure Min Driving Line Quality does not exceed Max Driving Line Quality
+                    const minSlider = document.getElementById("Min Driving Line Quality");
+                    const minInput = document.getElementById("Min Driving Line Quality-input");
+                    if (parseInt(minSlider.value) > param.default) {
+                        minSlider.value = param.default;
+                        minInput.value = param.default;
+                        document.getElementById("Min Driving Line Quality-value").textContent = `Current: ${param.default}`;
+                    }
+                } else if (param.name === "Min Driving Line Quality") {
+                    // Ensure Min Driving Line Quality does not exceed Max Driving Line Quality
+                    const maxSlider = document.getElementById("Max Driving Line Quality");
+                    const maxInput = document.getElementById("Max Driving Line Quality-input");
+                    if (parseInt(slider.value) > parseInt(maxSlider.value)) {
+                        slider.value = maxSlider.value;
+                        numberInput.value = maxSlider.value;
+                        valueDisplay.textContent = `Current: ${maxSlider.value}`;
+                    }
+                }
+
+                // Recalculate tokens
+                tokens = 5000 - parameters.reduce((total, p) => {
+                    const sliderValue = parseInt(document.getElementById(p.name).value);
+                    const difference = sliderValue - p.default;
+                    const adjustment = p.reverseCost ? -difference * p.costs : difference * p.costs;
+                    return total + adjustment;
+                }, 0);
+
+                // Update tokens display
+                tokensDisplay.textContent = tokens.toFixed(5).replace(/\.?0+$/, ""); // Round if necessary
+                warning.style.display = tokens < 0 ? "block" : "none";
+            };
+
             buttonCol.appendChild(resetButton);
 
             container.appendChild(labelCol);
@@ -212,17 +349,104 @@
             return container;
         }
 
+        function updateSlowdownIgnoreCostDisplay() {
+            const slowdownSlider = document.getElementById("Slowdown ‰");
+            const remainingSlowdown = parseInt(slowdownSlider.value);
+            const remainingCost = remainingSlowdown * 75; // Cost per unit of Slowdown ‰ is 75 tokens
+            const slowdownIgnoreCostPerUnit = 0.095 * remainingCost / 100; // 0.095% per unit in permille
+
+            const label = document.querySelector("label[for='Slowdown Ignore Probability ‰']");
+            label.textContent = `Slowdown Ignore Probability ‰ (Cost: ${slowdownIgnoreCostPerUnit.toFixed(3)} tokens/unit)`;
+        }
+
+        function updateSlider(slider) {
+            const param = parameters.find(p => p.name === slider.id);
+            const currentValue = parseInt(slider.value);
+            const defaultValue = param.default;
+            const difference = currentValue - defaultValue;
+
+            // Calculate cost adjustment
+            let costAdjustment = param.reverseCost ? -difference * param.costs : difference * param.costs;
+
+            // Special logic for "Slowdown Ignore Probability ‰"
+            if (param.name === "Slowdown Ignore Probability ‰") {
+                const slowdownSlider = document.getElementById("Slowdown ‰");
+                const remainingSlowdown = parseInt(slowdownSlider.value);
+                const remainingCost = remainingSlowdown * 75; // Cost per unit of Slowdown ‰ is 75 tokens
+                param.costs = 0.095 * remainingCost / 100; // 0.095% per unit in permille
+                costAdjustment = difference * param.costs; // Recalculate cost adjustment
+            }
+
+            if (param.name === "Slowdown ‰") {
+                // Update the displayed cost for "Slowdown Ignore Probability ‰"
+                updateSlowdownIgnoreCostDisplay();
+            }
+
+            if (param.name === "Min Driving Line Quality" || param.name === "Max Driving Line Quality") {
+                const minSlider = document.getElementById("Min Driving Line Quality");
+                const maxSlider = document.getElementById("Max Driving Line Quality");
+                const minInput = document.getElementById("Min Driving Line Quality-input");
+                const maxInput = document.getElementById("Max Driving Line Quality-input");
+
+                const minValue = parseInt(minSlider.value);
+                const maxValue = parseInt(maxSlider.value);
+
+                if (param.name === "Min Driving Line Quality" && currentValue > maxValue) {
+                    slider.value = maxValue; // Limit min slider to max slider's value
+                    document.getElementById(`${param.name}-input`).value = maxValue; // Update number input
+                    alert("Minimum line quality cannot exceed maximum line quality.");
+                } else if (param.name === "Max Driving Line Quality" && currentValue < minValue) {
+                    slider.value = minValue; // Limit max slider to min slider's value
+                    document.getElementById(`${param.name}-input`).value = minValue; // Update number input
+                    alert("Minimum line quality cannot exceed maximum line quality.");
+                }
+            }
+
+            // Adjust tokens based on the total cost
+            if (param.costs > 0) {
+                tokens = 5000 - parameters.reduce((total, p) => {
+                    const slider = document.getElementById(p.name);
+                    const value = parseInt(slider.value);
+                    const diff = value - p.default;
+
+                    // Handle dynamic costs for "Slowdown Ignore Probability ‰"
+                    if (p.name === "Slowdown Ignore Probability ‰") {
+                        const slowdownSlider = document.getElementById("Slowdown ‰");
+                        const remainingSlowdown = parseInt(slowdownSlider.value);
+                        const remainingCost = remainingSlowdown * 75;
+                        p.costs = 0.095 * remainingCost / 100;
+                    }
+
+                    const adjustment = p.reverseCost ? -diff * p.costs : diff * p.costs;
+                    return total + adjustment;
+                }, 0);
+            }
+
+            document.getElementById(`${param.name}-value`).textContent = `Current: ${slider.value}`;
+            updateTokens();
+        }
+
+
         const speedSection = document.getElementById("speed-section");
-        const preferenceSection = document.getElementById("preference-section");
+        const corneringSection = document.getElementById("cornering-section");
+        const pathSection = document.getElementById("path-section");
+        const wheelSection = document.getElementById("wheel-section");
 
         parameters.forEach(param => {
             const slider = createSlider(param);
             if (param.category === "Speed") {
                 speedSection.appendChild(slider);
-            } else if (param.category === "Preference") {
-                preferenceSection.appendChild(slider);
+            } else if (param.category === "Cornering") {
+                corneringSection.appendChild(slider);
+            } else if (param.category === "Path") {
+                pathSection.appendChild(slider);
+            } else if (param.category === "Wheel") {
+                wheelSection.appendChild(slider);
             }
         });
+
+        // Update cost labels after creating sliders
+        updateCostLabels();
 
         updateTokens();
     </script>
