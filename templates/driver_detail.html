@@ -13,28 +13,36 @@
     <h2 class="display-4">ELO Progress for {{ driver_name }}</h2>
 
     <!-- Heat ELO Graph -->
-    <h3>Heat ELO</h3>
+    <h3 class="mt-5">Heat ELO</h3>
     {% if not heat_data %}
-        <div class="alert alert-warning mt-3" role="alert">
-            No Heat ELO data found for {{ driver_name }}.
-        </div>
+    <div class="alert alert-warning mt-3" role="alert">
+        No Heat ELO data found for {{ driver_name }}.
+    </div>
     {% else %}
-        <div class="container mt-3" style="max-width: 800px; height: 400px;">
-            <canvas id="heatEloChart"></canvas>
+    <div class="graph-container  mt-3">
+        <canvas id="heatEloChart"></canvas>
+        <div class="button-container">
+            <button id="toggleHeatGraph" class="btn btn-danger">Switch to Date-based Graph</button>
         </div>
+    </div>
     {% endif %}
 
     <!-- League/Event ELO Graph -->
-    <h3>League/Event ELO</h3>
+    <h3 class="mt-5">League/Event ELO</h3>
     {% if not league_data %}
-        <div class="alert alert-warning mt-3" role="alert">
-            No League/Event ELO data found for {{ driver_name }}.
-        </div>
+    <div class="alert alert-warning mt-3" role="alert">
+        No League/Event ELO data found for {{ driver_name }}.
+    </div>
     {% else %}
-        <div class="container mt-3" style="max-width: 800px; height: 400px;">
-            <canvas id="leagueEloChart"></canvas>
+    <div class="graph-container">
+        <canvas id="leagueEloChart"></canvas>
+        <div class="button-container">
+            <button id="toggleLeagueGraph" class="btn btn-danger">Switch to Date-based Graph</button>
         </div>
+    </div>
     {% endif %}
+
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.3/build/global/luxon.min.js"></script>
@@ -46,17 +54,27 @@
     const heatData = {{ heat_data | tojson }};
     if (heatData && heatData.length > 0) {
         const heatTimestamps = heatData.map(entry => new Date(entry.timestamp));
-        const heatEloValues = heatData.map(entry => entry.elo);
         const heatRaceCounts = heatData.map(entry => entry.race_count);
+        const heatEloValues = heatData.map(entry => entry.elo);
         const heatTrackNames = heatData.map(entry => entry.track_name);
         const heatCarNames = heatData.map(entry => entry.car_name);
 
         const heatCtx = document.getElementById('heatEloChart');
-        if (heatCtx) {
-            new Chart(heatCtx.getContext('2d'), {
+        let heatChartType = 'race'; // Default graph type
+        let heatChart;
+
+        const renderHeatChart = () => {
+            const isRaceGraph = heatChartType === 'race';
+            const labels = isRaceGraph ? heatRaceCounts : heatTimestamps;
+            const xAxisTitle = isRaceGraph ? 'Race Count' : 'Date';
+            const xAxisType = isRaceGraph ? 'linear' : 'time';
+
+            if (heatChart) heatChart.destroy();
+
+            heatChart = new Chart(heatCtx.getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: heatTimestamps,
+                    labels: labels,
                     datasets: [{
                         label: 'Heat ELO Progress',
                         data: heatEloValues,
@@ -72,15 +90,16 @@
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                title: function(tooltipItems) {
-                                    const date = new Date(tooltipItems[0].label);
+                                title: function (tooltipItems) {
+                                    const index = tooltipItems[0].dataIndex;
+                                    const date = heatTimestamps[index];
                                     return date.toLocaleString('en-US', {
                                         year: 'numeric',
                                         month: 'short',
                                         day: 'numeric'
                                     });
                                 },
-                                label: function(tooltipItem) {
+                                label: function (tooltipItem) {
                                     const index = tooltipItem.dataIndex;
                                     return `ELO: ${heatEloValues[index].toFixed(1)} Races: ${heatRaceCounts[index]} Track: ${heatTrackNames[index]} Car: ${heatCarNames[index]}`;
                                 }
@@ -91,16 +110,21 @@
                     maintainAspectRatio: true,
                     scales: {
                         x: {
-                            type: 'time',
-                            time: {
+                            type: xAxisType,
+                            title: {
+                                display: true,
+                                text: xAxisTitle
+                            },
+                            ticks: {
+                                precision: 0 // Ensure integer ticks
+                            },
+                            min: isRaceGraph ? 1 : undefined,
+                            max: isRaceGraph ? heatRaceCounts.length : undefined, // Set max to the number of races
+                            time: isRaceGraph ? undefined : {
                                 unit: 'day',
                                 displayFormats: {
                                     day: 'MMM d, yyyy'
                                 }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Date'
                             }
                         },
                         y: {
@@ -112,24 +136,44 @@
                     }
                 }
             });
-        }
+        };
+
+        document.getElementById('toggleHeatGraph').addEventListener('click', () => {
+            heatChartType = heatChartType === 'race' ? 'date' : 'race';
+            renderHeatChart();
+            document.getElementById('toggleHeatGraph').textContent = heatChartType === 'race'
+                ? 'Switch to Date-based Graph'
+                : 'Switch to Race-based Graph';
+        });
+
+        renderHeatChart(); // Render the default graph
     }
 
     // League/Event ELO Data
     const leagueData = {{ league_data | tojson }};
     if (leagueData && leagueData.length > 0) {
         const leagueTimestamps = leagueData.map(entry => new Date(entry.timestamp));
-        const leagueEloValues = leagueData.map(entry => entry.elo);
         const leagueRaceCounts = leagueData.map(entry => entry.race_count);
+        const leagueEloValues = leagueData.map(entry => entry.elo);
         const leagueTrackNames = leagueData.map(entry => entry.track_name);
         const leagueCarNames = leagueData.map(entry => entry.car_name);
 
         const leagueCtx = document.getElementById('leagueEloChart');
-        if (leagueCtx) {
-            new Chart(leagueCtx.getContext('2d'), {
+        let leagueChartType = 'race'; // Default graph type
+        let leagueChart;
+
+        const renderLeagueChart = () => {
+            const isRaceGraph = leagueChartType === 'race';
+            const labels = isRaceGraph ? leagueRaceCounts : leagueTimestamps;
+            const xAxisTitle = isRaceGraph ? 'Race Count' : 'Date';
+            const xAxisType = isRaceGraph ? 'linear' : 'time';
+
+            if (leagueChart) leagueChart.destroy();
+
+            leagueChart = new Chart(leagueCtx.getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: leagueTimestamps,
+                    labels: labels,
                     datasets: [{
                         label: 'League/Event ELO Progress',
                         data: leagueEloValues,
@@ -145,15 +189,16 @@
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                title: function(tooltipItems) {
-                                    const date = new Date(tooltipItems[0].label);
+                                title: function (tooltipItems) {
+                                    const index = tooltipItems[0].dataIndex;
+                                    const date = leagueTimestamps[index];
                                     return date.toLocaleString('en-US', {
                                         year: 'numeric',
                                         month: 'short',
                                         day: 'numeric'
                                     });
                                 },
-                                label: function(tooltipItem) {
+                                label: function (tooltipItem) {
                                     const index = tooltipItem.dataIndex;
                                     return `ELO: ${leagueEloValues[index].toFixed(1)} Races: ${leagueRaceCounts[index]} Track: ${leagueTrackNames[index]} Car: ${leagueCarNames[index]}`;
                                 }
@@ -164,16 +209,21 @@
                     maintainAspectRatio: true,
                     scales: {
                         x: {
-                            type: 'time',
-                            time: {
+                            type: xAxisType,
+                            title: {
+                                display: true,
+                                text: xAxisTitle
+                            },
+                            ticks: {
+                                precision: 0 // Ensure integer ticks
+                            },
+                            min: isRaceGraph ? 1 : undefined,
+                            max: isRaceGraph ? leagueRaceCounts.length : undefined, // Set max to the number of races
+                            time: isRaceGraph ? undefined : {
                                 unit: 'day',
                                 displayFormats: {
                                     day: 'MMM d, yyyy'
                                 }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Date'
                             }
                         },
                         y: {
@@ -185,8 +235,20 @@
                     }
                 }
             });
-        }
+        };
+
+        document.getElementById('toggleLeagueGraph').addEventListener('click', () => {
+            leagueChartType = leagueChartType === 'race' ? 'date' : 'race';
+            renderLeagueChart();
+            document.getElementById('toggleLeagueGraph').textContent = leagueChartType === 'race'
+                ? 'Switch to Date-based Graph'
+                : 'Switch to Race-based Graph';
+        });
+
+        renderLeagueChart(); // Render the default graph
     }
+
+
 </script>
 
 {% endblock %}
