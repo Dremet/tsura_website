@@ -10,8 +10,10 @@
 
     <div class="alert alert-dark" role="alert">
         <h4 class="alert-heading">Welcome!</h4>
-        <p>This is a community project that shows hotlapping lap times from the Hotlapping TSU server, an elo list based on league/event results as well as a elo list based on races on the TripleHeat server. 
-            Times driven on the hotlapping server should be updated within 10 seconds after the event ended (when you are back in the menu basically). For the TripleHeat server it takes up to a minute.
+        <p>This is a community project that shows hotlapping lap times from the Hotlapping TSU server, an elo list based
+            on league/event results as well as a elo list based on races on the TripleHeat server.
+            Times driven on the hotlapping server should be updated within 10 seconds after the event ended (when you
+            are back in the menu basically). For the TripleHeat server it takes up to a minute.
         </p>
         <hr>
         <p class="mb-0">Whenever you find or suspect a bug, please send a message to Dremet on discord.</p>
@@ -20,7 +22,7 @@
     <blockquote class="blockquote">
         <p>TSURA stands for <a href="https://www.turbosliders.com/home" target="_blank">Turbo Sliders Unlimited</a>
             Racing Association.
-            <a href="https://discord.gg/eJcWWmRkXQ" target="_blank">Join us
+            <a href="https://discord.gg/krH9THHAVX" target="_blank">Join us
                 on Discord!</a>
         </p>
     </blockquote>
@@ -68,30 +70,44 @@
     <h2 class="display-4">Elo Rating</h2>
     <dl class="row">
         <dt class="col-sm-3">What is an elo rating?</dt>
-        <dd class="col-sm-9">"The Elo rating system is a method for calculating the relative skill levels of players in zero-sum games such as chess or esports. It is named after its creator Arpad Elo, a Hungarian-American physics professor." - <a href="https://en.wikipedia.org/wiki/Elo_rating_system">Wikipedia</a></dd>
-      
+        <dd class="col-sm-9">"The Elo rating system is a method for calculating the relative skill levels of players in
+            zero-sum games such as chess or esports. It is named after its creator Arpad Elo, a Hungarian-American
+            physics professor." - <a href="https://en.wikipedia.org/wiki/Elo_rating_system">Wikipedia</a></dd>
+
         <dt class="col-sm-3">Isn't elo only for 2 player games?</dt>
-        <dd class="col-sm-9">Yes but it can be adapted, see <a href="https://towardsdatascience.com/developing-a-generalized-elo-rating-system-for-multiplayer-games-b9b495e87802">here</a> for details. Basically, it calculates an expected score/position for everyone based on everyone's current elo and then checks how far
-        the actual score deviates from the expected score. The deviation is than translated to a win or loss of elo rating.</dd>
-      
+        <dd class="col-sm-9">Yes but it can be adapted, see <a
+                href="https://towardsdatascience.com/developing-a-generalized-elo-rating-system-for-multiplayer-games-b9b495e87802">here</a>
+            for details. Basically, it calculates an expected score/position for everyone based on everyone's current
+            elo and then checks how far
+            the actual score deviates from the expected score. The deviation is than translated to a win or loss of elo
+            rating.</dd>
+
         <dt class="col-sm-3">Which races do count?</dt>
-        <dd class="col-sm-9">Semi-realistic league and event races like F3, GrT, GTE etc. Relatively short (less than 20 minutes) races with reversed grid starts do not count. Hotlapping results do not count. Closed-community events also don't count.</dd>
-            
+        <dd class="col-sm-9">Semi-realistic league and event races like F3, GrT, GTE etc. Relatively short (less than 20
+            minutes) races with reversed grid starts do not count. Hotlapping results do not count. Closed-community
+            events also don't count.</dd>
+
         <dt class="col-sm-3">When/How does it update?</dt>
         <dd class="col-sm-9">
-          It requires a manual processing step. If I (Dremet) participate in a league/event race I will often update it right after the event. If I don't participate, please send me the json result file and I will update it in the following days.
+            It requires a manual processing step. If I (Dremet) participate in a league/event race I will often update
+            it right after the event. If I don't participate, please send me the json result file and I will update it
+            in the following days.
         </dd>
 
         <dt class="col-sm-3">What if I miss a race?</dt>
         <dd class="col-sm-9">
-          Nothing. Elo changes only if you participate in the respective race.
+            Nothing. Elo changes only if you participate in the respective race.
         </dd>
 
         <dt class="col-sm-3">Is it perfect?</dt>
-        <dd class="col-sm-9">Obviously, it is not but it should be close to the best possible skill estimation among the community. Drawbacks are "certain numbers of races needed to get to your elo level", "in the short run the number of partitipations might be more important than your skill", "some people might be significantly better with one car than with another" etc.
-            Splitting elo into multiple car classes would decrease the number of data points for each and therefore would make numbers less useful. 
+        <dd class="col-sm-9">Obviously, it is not but it should be close to the best possible skill estimation among the
+            community. Drawbacks are "certain numbers of races needed to get to your elo level", "in the short run the
+            number of partitipations might be more important than your skill", "some people might be significantly
+            better with one car than with another" etc.
+            Splitting elo into multiple car classes would decrease the number of data points for each and therefore
+            would make numbers less useful.
         </dd>
-      </dl>
+    </dl>
 </div>
 
 
