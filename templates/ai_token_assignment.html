@@ -19,10 +19,14 @@
             color: red;
         }
 
+        #tokens-container:active {
+            cursor: grabbing;
+        }
+
         #tokens-container {
             position: fixed;
             top: 10px;
-            right: 10px;
+            left: calc(100vw - 390px);
             background-color: white;
             color: black;
             padding: 10px 15px;
@@ -93,8 +97,8 @@
 <body>
     <div class="container">
         <div class="alert alert-warning text-center" role="alert">
-            You can spend your tokens to improve or change the behaviour of your AI driver in the races. Screenshot when
-            you are done and send it to Igiava via <a href="https://forms.gle/Jg8BN5PYHb5UyXLd8">this form</a>.
+            You can spend your tokens to improve or change the behaviour of your AI driver in the races. <br>Copy the seed when
+            you are done and send it to Igiava via <a href="https://forms.gle/Jg8BN5PYHb5UyXLd8">this form</a></br>.
         </div>
         <h1 class="text-center">AI Parameter Adjustment</h1>
         <div id="tokens-container">
@@ -144,11 +148,11 @@
             // Path Following Parameters (Free)
             { name: "Stuck Time Limit", category: "Path", min: 1, max: 10, default: 5, costs: 0, description: "Time limit (in seconds) before AI considers itself stuck and respawns. Too low values may cause respawning in unnecessary conditions." },
             { name: "Distance for Full Correction", category: "Path", min: 5, max: 50, default: 25, costs: 0, description: "Distance in metres from the line AI needs to drive perpendicularly towards the track. Too low values may cause the car to zigzag, too high may cause the car not to react to being off-road." },
-            { name: "Random Path Variation", category: "Path", min: 0, max: 200, default: 50, costs: 0, description: "Distance in centimetres, up to which the AI randomly varies its path position for variety. Higher values increase variation but risk collisions." },
+            { name: "Random Path Variation", category: "Path", min: 10, max: 200, default: 50, costs: 0, description: "Distance in centimetres, up to which the AI randomly varies its path position for variety. Higher values increase variation but risk collisions." },
 
             // Wheel-to-Wheel Parameters (Free)
-            { name: "Lateral Avoidance", category: "Wheel", min: 0, max: 10, default: 6, costs: 0, description: "Determines how much space the AI gives when driving side-by-side or avoiding side collisions, in half-metres. 1 = 0.5m, 10 = 5m." },
-            { name: "Overtake Time", category: "Wheel", min: 0, max: 5, default: 3, costs: 0, description: "Determines how much time before collision with the car in front the AI starts to move away from it or to initiate overtaking manoeuvre. Zero means that overtaking is never initiated." },
+            { name: "Lateral Avoidance", category: "Wheel", min: 1, max: 10, default: 6, costs: 0, description: "Determines how much space the AI gives when driving side-by-side or avoiding side collisions, in half-metres. 1 = 0.5m, 10 = 5m." },
+            { name: "Overtake Time", category: "Wheel", min: 1, max: 5, default: 3, costs: 0, description: "Determines how much time before collision with the car in front the AI starts to move away from it or to initiate overtaking manoeuvre. Zero means that overtaking is never initiated." },
             { name: "Overtake Space", category: "Wheel", min: 1, max: 10, default: 5, costs: 0, description: "Determines how much to the side the AI moves when initiating overtaking manoeuvre, in quarter-metres. 1 = 0.25m, 10 = 2.5m." }
         ];
 
@@ -167,7 +171,6 @@
             }
         }
 
-
         function resetAll() {
             parameters.forEach(param => {
                 const slider = document.getElementById(param.name);
@@ -185,16 +188,34 @@
         let isDragging = false;
         let offsetX = 0;
         let offsetY = 0;
+        let initialDrag = true;
 
         tokensContainer.addEventListener("mousedown", (e) => {
-            isDragging = true;
-            offsetX = e.clientX - tokensContainer.getBoundingClientRect().left;
-            offsetY = e.clientY - tokensContainer.getBoundingClientRect().top;
-            tokensContainer.style.cursor = "grabbing";
+            if (!e.target.closest("button, input, select, textarea, a")) {
+                isDragging = true;
 
-            // Reset conflicting styles
-            tokensContainer.style.right = "auto";
-            tokensContainer.style.bottom = "auto";
+                if (initialDrag) {
+                  offsetX = e.clientX - tokensContainer.offsetLeft;
+                  offsetY = e.clientY - tokensContainer.offsetTop;
+                  initialDrag = false;
+                }
+
+                tokensContainer.style.cursor = "grabbing";
+            }
+        });
+
+        tokensContainer.addEventListener("touchstart", (e) => {
+            if (!e.target.closest("button, input, select, textarea, a")) {
+                isDragging = true;
+
+                if (initialDrag) {
+                  offsetX = e.touches[0].clientX - tokensContainer.offsetLeft;
+                  offsetY = e.touches[0].clientY - tokensContainer.offsetTop;
+                  initialDrag = false;
+                }
+
+                tokensContainer.style.cursor = "grabbing";
+            }
         });
 
         document.addEventListener("mousemove", (e) => {
@@ -207,6 +228,17 @@
             }
         });
 
+        document.addEventListener("touchmove", (e) => {
+            if (isDragging) {
+                e.preventDefault(); // Prevent scrolling
+                const newX = e.touches[0].clientX - offsetX;
+                const newY = e.touches[0].clientY - offsetY;
+
+                tokensContainer.style.left = `${newX}px`;
+                tokensContainer.style.top = `${newY}px`;
+            }
+        }, { passive: false });
+
         document.addEventListener("mouseup", () => {
             if (isDragging) {
                 isDragging = false;
@@ -214,6 +246,9 @@
             }
         });
 
+        document.addEventListener("touchend", () => {
+            isDragging = false;
+        });
 
         function updateCostLabels() {
             parameters.forEach(param => {
@@ -449,6 +484,173 @@
         updateCostLabels();
 
         updateTokens();
+
+        const seedDisplay = document.createElement("div");
+        seedDisplay.id = "parameter-seed";
+        seedDisplay.style.marginTop = "10px";
+        tokensContainer.appendChild(seedDisplay);
+
+        const copyButton = document.createElement("button");
+        copyButton.textContent = "Copy Seed";
+        copyButton.className = "btn btn-sm btn-outline-secondary"; // Bootstrap styling
+        copyButton.style.marginLeft = "10px"; // Some spacing
+        copyButton.style.marginTop = "5px";
+        copyButton.addEventListener("click", () => {
+            const seed = document.getElementById("parameter-seed").textContent.substring(6);
+
+            // Create a temporary textarea element
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = seed;
+            document.body.appendChild(tempTextArea); // Add to the DOM
+            tempTextArea.select(); // Select the text
+            tempTextArea.setSelectionRange(0, 99999); // For mobile devices
+
+            try {
+                document.execCommand("copy"); // Copy the text
+                copyButton.textContent = "Copied!"; // Update button text
+            } catch (err) {
+                console.error("Copy failed: ", err);
+                copyButton.textContent = "Copy Failed";
+            }
+
+            document.body.removeChild(tempTextArea); // Remove the textarea
+            setTimeout(() => {
+                copyButton.textContent = "Copy Seed"; // Reset button text
+            }, 2000);
+        });
+        tokensContainer.appendChild(copyButton);
+
+        function generateSeed() {
+            let seed = "";
+            parameters.forEach(param => {
+                const slider = document.getElementById(param.name);
+                const value = parseInt(slider.value);
+                const normalizedValue = (value - param.min) / (param.max - param.min);
+                const scaledValue = Math.round(normalizedValue * 1000);
+
+                seed += scaledValue.toString(36).padStart(2, '0'); // Base 36, 2 digits
+            });
+            return seed.toUpperCase();
+        }
+
+        function updateSeedDisplay() {
+            const seed = generateSeed();
+            seedDisplay.textContent = `Seed: ${seed}`;
+        }
+
+        // Add an event listener to update the seed whenever a slider changes
+        parameters.forEach(param => {
+            const slider = document.getElementById(param.name);
+            const input = document.getElementById(`${param.name}-input`);
+            slider.addEventListener('input', updateSeedDisplay);
+            input.addEventListener('input', updateSeedDisplay); // Also update on manual input
+        });
+
+        // Initial seed generation
+        updateSeedDisplay();
+
+        // Konami Code sequence
+        const konamiCode = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
+        let konamiCodeIndex = 0;
+
+        // Seed Input Field (Hidden initially)
+        const seedInput = document.createElement("input");
+        seedInput.type = "text";
+        seedInput.id = "import-seed";
+        seedInput.style.display = "none"; // Initially hidden
+        seedInput.style.marginTop = "10px";
+        seedInput.placeholder = "Enter Seed";
+
+        const importButton = document.createElement("button");
+        importButton.textContent = "Import";
+        importButton.className = "btn btn-sm btn-outline-secondary";
+        importButton.style.display = "none";
+        importButton.style.marginLeft = "10px";
+        importButton.style.marginTop = "5px";
+
+        importButton.addEventListener("click", () => {
+            const seed = seedInput.value;
+            if (seed.length !== parameters.length * 2) {
+                alert("Invalid seed length. Please enter a seed with " + parameters.length * 2 + " characters.");
+                return;
+            }
+
+            try {
+                // Find indices of Min and Max Driving Line Quality
+                const minIndex = parameters.findIndex(p => p.name === "Min Driving Line Quality");
+                const maxIndex = parameters.findIndex(p => p.name === "Max Driving Line Quality");
+
+
+                // Import Max Driving Line Quality FIRST
+                const maxParam = parameters[maxIndex];
+                const maxSeedChunk = seed.substring(maxIndex * 2, (maxIndex + 1) * 2);
+                const maxScaledValue = parseInt(maxSeedChunk, 36);
+                const maxOriginalValue = Math.round(maxParam.min + (maxScaledValue / 1000) * (maxParam.max - maxParam.min));
+
+                const maxSlider = document.getElementById(maxParam.name);
+                const maxInput = document.getElementById(`${maxParam.name}-input`);
+                maxSlider.value = maxOriginalValue;
+                maxInput.value = maxOriginalValue;
+                document.getElementById(`${maxParam.name}-value`).textContent = `Current: ${maxOriginalValue}`;
+                updateSlider(maxSlider); // Important: Update the max slider FIRST
+
+                // Then Import Min Driving Line Quality
+                const minParam = parameters[minIndex];
+                const minSeedChunk = seed.substring(minIndex * 2, (minIndex + 1) * 2);
+                const minScaledValue = parseInt(minSeedChunk, 36);
+                const minOriginalValue = Math.round(minParam.min + (minScaledValue / 1000) * (minParam.max - minParam.min));
+
+                const minSlider = document.getElementById(minParam.name);
+                const minInput = document.getElementById(`${minParam.name}-input`);
+                minSlider.value = minOriginalValue;
+                minInput.value = minOriginalValue;
+                document.getElementById(`${minParam.name}-value`).textContent = `Current: ${minOriginalValue}`;
+                updateSlider(minSlider); // Update min slider after max is set
+
+                // Import other parameters in their original order
+                for (let i = 0; i < parameters.length; i++) {
+                    if (i !== minIndex && i !== maxIndex) { // Skip min and max
+                        const param = parameters[i];
+                        const seedChunk = seed.substring(i * 2, (i + 1) * 2);
+                        const scaledValue = parseInt(seedChunk, 36);
+                        const originalValue = Math.round(param.min + (scaledValue / 1000) * (param.max - param.min));
+
+                        const slider = document.getElementById(param.name);
+                        const input = document.getElementById(`${param.name}-input`);
+                        slider.value = originalValue;
+                        input.value = originalValue;
+                        document.getElementById(`${param.name}-value`).textContent = `Current: ${originalValue}`;
+                        updateSlider(slider);
+                    }
+                }
+                updateSeedDisplay();
+                updateTokens(); // Update the token counter after import
+                alert("Seed imported successfully!");
+                seedInput.style.display = "none";
+                importButton.style.display = "none";
+
+            } catch (error) {
+
+                alert("Invalid seed format. Please enter a valid seed.");
+                console.error("Seed import error:", error);
+            }
+        });
+
+        tokensContainer.appendChild(seedInput);
+        tokensContainer.appendChild(importButton);
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === konamiCode[konamiCodeIndex]) {
+                konamiCodeIndex++;
+                if (konamiCodeIndex === konamiCode.length) {
+                    seedInput.style.display = "inline";
+                    importButton.style.display = "inline";
+                    konamiCodeIndex = 0; // Reset Konami Code index
+                }
+            } else {
+                konamiCodeIndex = 0; // Reset if incorrect key pressed
+            }
+        });
     </script>
 </body>
 
