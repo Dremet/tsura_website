@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Parameter Adjustment</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static',filename='apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static',filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static',filename='favicon-16x16.png') }}">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -43,10 +46,14 @@
         }
 
         #tokens-container .warning {
-            color: red; /* Text color for the warning */
-            font-size: 0.9rem; /* Slightly smaller font */
-            margin-top: 5px; /* Space below tokens */
-            display: none; /* Hidden by default */
+            color: red;
+            /* Text color for the warning */
+            font-size: 0.9rem;
+            /* Slightly smaller font */
+            margin-top: 5px;
+            /* Space below tokens */
+            display: none;
+            /* Hidden by default */
         }
 
         button {
@@ -64,32 +71,38 @@
             -webkit-appearance: none;
             width: 100%;
             height: 8px;
-            background: #D0D0D0; /* Grey track */
+            background: #D0D0D0;
+            /* Grey track */
             border-radius: 5px;
             outline: none;
         }
 
         /* For Webkit browsers (Chrome, Safari) */
         input[type="range"]::-webkit-slider-runnable-track {
-            background: #D0D0D0; /* Grey track */
+            background: #D0D0D0;
+            /* Grey track */
             height: 8px;
             border-radius: 5px;
         }
 
         /* For Firefox */
         input[type="range"]::-moz-range-track {
-            background: #D0D0D0; /* Grey track */
+            background: #D0D0D0;
+            /* Grey track */
             height: 8px;
             border-radius: 5px;
         }
 
         /* For Internet Explorer */
         input[type="range"]::-ms-track {
-            background: #D0D0D0; /* Grey track */
+            background: #D0D0D0;
+            /* Grey track */
             height: 8px;
             border-radius: 5px;
-            border-color: transparent; /* Hide default borders */
-            color: transparent; /* Hide default tick marks */
+            border-color: transparent;
+            /* Hide default borders */
+            color: transparent;
+            /* Hide default tick marks */
         }
     </style>
 </head>
@@ -97,14 +110,15 @@
 <body>
     <div class="container">
         <div class="alert alert-warning text-center" role="alert">
-            You can spend your tokens to improve or change the behaviour of your AI driver in the races. <br>Copy the seed when
+            You can spend your tokens to improve or change the behaviour of your AI driver in the races. <br>Copy the
+            seed when
             you are done and send it to Igiava via <a href="https://forms.gle/Jg8BN5PYHb5UyXLd8">this form</a></br>.
         </div>
         <h1 class="text-center">AI Parameter Adjustment</h1>
         <div id="tokens-container">
             <div>Remaining Tokens: <span id="tokens">5000</span></div>
             <div id="warning" class="warning" style="display: none;">Warning: You have exceeded your token limit!</div>
-        </div>        
+        </div>
 
         <!-- Speed Parameters -->
         <div class="section" id="speed-section">
@@ -159,7 +173,7 @@
         let tokens = 5000;
         const tokensDisplay = document.getElementById("tokens");
         const warning = document.getElementById("warning");
-        
+
         function updateTokens() {
             tokensDisplay.textContent = tokens.toFixed(tokens % 1 === 0 ? 0 : 5); // Round if necessary
             const warning = document.getElementById("warning");
@@ -195,9 +209,9 @@
                 isDragging = true;
 
                 if (initialDrag) {
-                  offsetX = e.clientX - tokensContainer.offsetLeft;
-                  offsetY = e.clientY - tokensContainer.offsetTop;
-                  initialDrag = false;
+                    offsetX = e.clientX - tokensContainer.offsetLeft;
+                    offsetY = e.clientY - tokensContainer.offsetTop;
+                    initialDrag = false;
                 }
 
                 tokensContainer.style.cursor = "grabbing";
@@ -209,9 +223,9 @@
                 isDragging = true;
 
                 if (initialDrag) {
-                  offsetX = e.touches[0].clientX - tokensContainer.offsetLeft;
-                  offsetY = e.touches[0].clientY - tokensContainer.offsetTop;
-                  initialDrag = false;
+                    offsetX = e.touches[0].clientX - tokensContainer.offsetLeft;
+                    offsetY = e.touches[0].clientY - tokensContainer.offsetTop;
+                    initialDrag = false;
                 }
 
                 tokensContainer.style.cursor = "grabbing";
@@ -257,12 +271,10 @@
                     // Add "per unit removal" for reverseCost parameters
                     label.textContent = `${param.name} (Cost: ${param.costs} tokens/unit removal)`;
                 } else {
-                    if (param.step > 1)
-                    {
+                    if (param.step > 1) {
                         label.textContent = `${param.name} (Cost: ${param.costs * param.step} tokens/2 units)`;
                     } else {
-                        if ((param.category === "Path") || (param.category === "Wheel"))
-                        {
+                        if ((param.category === "Path") || (param.category === "Wheel")) {
                             label.textContent = `${param.name}`
                         } else {
                             label.textContent = `${param.name} (Cost: ${param.costs} tokens/unit)`;
